@@ -4,6 +4,21 @@ const port = 8080;
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const path = require("path");
+
+const connection = mysql.createConnection({
+  host: "127.0.0.1",
+  user: "root",
+  password: "1q2w3e4r!",
+  database: "realestate",
+});
+connection.connect((err) => {
+  if (err) {
+    console.error("Error connecting to MySQL:", err);
+    return;
+  }
+  console.log("Connected to MySQL");
+});
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
@@ -50,4 +65,8 @@ app.listen(port, () => {
 
 app.get("/", function (req, res) {
   res.render("index.ejs");
+});
+
+app.get("/enter", function (req, res) {
+  res.render("enter.ejs");
 });
