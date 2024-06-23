@@ -147,15 +147,25 @@
       .bd-mode-toggle .dropdown-menu .active .bi {
         display: block !important;
       }
+      .hidden {
+        display: none;
+      }
+
+      .visible {
+        display: block;
+      }
     </style>
   </head>
   <body>
     <%- include('partials/header') %>
-
     <main>
       <div class="form-container">
-        <h1 class="mb-4">매물 등록</h1>
-        <form action="/save" method="post" enctype="multipart/form-data">
+        <h1 class="mb-4">매물 수정</h1>
+        <form
+          action="/property/update/<%= property.property_id %>"
+          method="post"
+          enctype="multipart/form-data"
+        >
           <div class="mb-3">
             <label for="name" class="form-label">매물 이름</label>
             <input
@@ -163,6 +173,7 @@
               class="form-control"
               id="name"
               name="name"
+              value="<%= property.name %>"
               required
             />
           </div>
@@ -175,13 +186,13 @@
               required
             >
               <option value="">매물 종류 선택하기</option>
-              <option value="아파트">아파트</option>
-              <option value="오피스텔">오피스텔</option>
-              <option value="상가">상가</option>
-              <option value="사무실">사무실</option>
-              <option value="주택">주택</option>
-              <option value="토지">토지</option>
-              <!-- 필요한 매물 종류 추가 -->
+              <% ['아파트', '오피스텔', '상가', '사무실', '주택',
+              '토지'].forEach(function(type) { %> <% if (property.property_type
+              === type) { %>
+              <option value="<%= type %>" selected><%= type %></option>
+              <% } else { %>
+              <option value="<%= type %>"><%= type %></option>
+              <% } %> <% }); %>
             </select>
           </div>
           <div class="mb-3">
@@ -191,16 +202,21 @@
               id="description"
               name="description"
               required
-            ></textarea>
+            >
+<%= property.description %></textarea
+            >
           </div>
 
           <div class="mb-3">
-            <label for="build_year" class="form-label">준공연도</label>
+            <label for="build_year" class="form-label"
+              >건물이 지어진 연도</label
+            >
             <input
               type="number"
               class="form-control"
               id="build_year"
               name="build_year"
+              value="<%= property.build_year %>"
               required
             />
           </div>
@@ -212,6 +228,7 @@
               class="form-control"
               id="total_floors"
               name="total_floors"
+              value="<%= property.total_floors %>"
               required
             />
           </div>
@@ -223,6 +240,7 @@
               class="form-control"
               id="floor"
               name="floor"
+              value="<%= property.floor %>"
               required
             />
           </div>
@@ -231,11 +249,12 @@
             <label for="city" class="form-label">도시</label>
             <select class="form-control" id="city" name="city" required>
               <option value="">도시 선택하기</option>
-              <option value="서울">서울</option>
-              <option value="부산">부산</option>
-              <option value="인천">인천</option>
-              <option value="대구">대구</option>
-              <!-- Add other cities as needed -->
+              <% ['서울', '부산', '인천', '대구'].forEach(function(city) { %> <%
+              if (property.city === city) { %>
+              <option value="<%= city %>" selected><%= city %></option>
+              <% } else { %>
+              <option value="<%= city %>"><%= city %></option>
+              <% } %> <% }); %>
             </select>
           </div>
 
@@ -243,7 +262,13 @@
             <label for="district" class="form-label">지역</label>
             <select class="form-control" id="district" name="district" required>
               <option value="">지역 선택하기</option>
-              <!-- District options will be populated based on the selected city -->
+              <% const selectedCityDistricts = districts[property.city] || [];
+              selectedCityDistricts.forEach(function(district) { %> <% if
+              (property.district === district) { %>
+              <option value="<%= district %>" selected><%= district %></option>
+              <% } else { %>
+              <option value="<%= district %>"><%= district %></option>
+              <% } %> <% }); %>
             </select>
           </div>
 
@@ -251,7 +276,13 @@
             <label for="town" class="form-label">동/읍/면</label>
             <select class="form-control" id="town" name="town" required>
               <option value="">동/읍/면 선택하기</option>
-              <!-- Town options will be populated based on the selected district -->
+              <% const selectedDistrictTowns = towns[property.district] || [];
+              selectedDistrictTowns.forEach(function(town) { %> <% if
+              (property.town === town) { %>
+              <option value="<%= town %>" selected><%= town %></option>
+              <% } else { %>
+              <option value="<%= town %>"><%= town %></option>
+              <% } %> <% }); %>
             </select>
           </div>
 
@@ -262,6 +293,7 @@
               class="form-control"
               id="detail_address"
               name="detail_address"
+              value="<%= property.detail_address %>"
               required
             />
           </div>
@@ -277,17 +309,15 @@
               required
             >
               <option value="">준공사 선택하기</option>
-              <option value="삼성물산">삼성물산</option>
-              <option value="현대건설">현대건설</option>
-              <option value="대우건설">대우건설</option>
-              <option value="포스코건설">포스코건설</option>
-              <option value="GS건설">GS건설</option>
-              <option value="롯데건설">롯데건설</option>
-              <option value="현대엔지니어링">현대엔지니어링</option>
-              <option value="한화건설">한화건설</option>
-              <option value="SK건설">SK건설</option>
-              <option value="HDC현대산업개발">HDC현대산업개발</option>
-              <!-- Add other construction companies as needed -->
+              <% const constructionCompanies = ['삼성물산', '현대건설',
+              '대우건설', '포스코건설', 'GS건설', '롯데건설', '현대엔지니어링',
+              '한화건설', 'SK건설', 'HDC현대산업개발'];
+              constructionCompanies.forEach(function(company) { %> <% if
+              (property.construction_company_name === company) { %>
+              <option value="<%= company %>" selected><%= company %></option>
+              <% } else { %>
+              <option value="<%= company %>"><%= company %></option>
+              <% } %> <% }); %>
             </select>
           </div>
 
@@ -301,155 +331,46 @@
               accept="image/*"
               multiple
             />
+            <% if (property.photos && property.photos.length > 0) { %>
+            <div class="mt-3">
+              <p>기존 사진:</p>
+              <% property.photos.forEach(function(photo) { %>
+              <img
+                src="<%= photo %>"
+                class="img-thumbnail mb-2"
+                style="max-height: 150px"
+              />
+              <% }); %>
+            </div>
+            <% } %>
           </div>
 
-          <div class="mb-3">
-            <label for="options" class="form-label">옵션</label>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="refrigerator"
-                name="options[]"
-                value="refrigerator"
-              />
-              <label class="form-check-label" for="refrigerator">냉장고</label>
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="tv"
-                name="options[]"
-                value="tv"
-              />
-              <label class="form-check-label" for="tv">TV</label>
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="air_conditioner"
-                name="options[]"
-                value="air_conditioner"
-              />
-              <label class="form-check-label" for="air_conditioner"
-                >에어컨</label
-              >
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="washing_machine"
-                name="options[]"
-                value="washing_machine"
-              />
-              <label class="form-check-label" for="washing_machine"
-                >세탁기</label
-              >
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="bed"
-                name="options[]"
-                value="bed"
-              />
-              <label class="form-check-label" for="bed">침대</label>
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="parking"
-                name="options[]"
-                value="parking"
-              />
-              <label class="form-check-label" for="parking">주차</label>
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="near_subway"
-                name="options[]"
-                value="near_subway"
-              />
-              <label class="form-check-label" for="near_subway">역세권</label>
-            </div>
-            <div class="mb-3">
-              <label for="nearest_subway_station" class="form-label"
-                >가장 가까운 지하철역</label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="nearest_subway_station"
-                name="nearest_subway_station"
-              />
-            </div>
+          <div
+            class="mb-3 <%= (property.property_type === '아파트' || property.property_type === '오피스텔') ? '' : 'hidden' %>"
+            id="monthly_rent_field"
+          >
+            <label for="monthly_rent" class="form-label">월세</label>
+            <input
+              type="number"
+              class="form-control"
+              id="monthly_rent"
+              name="monthly_rent"
+              value="<%= property.monthly_rent %>"
+            />
           </div>
 
-          <div class="mb-3">
-            <label for="security_options" class="form-label">보안 옵션</label>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="cctv"
-                name="security_options[]"
-                value="cctv"
-              />
-              <label class="form-check-label" for="cctv">CCTV</label>
-            </div>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="security_system"
-                name="security_options[]"
-                value="security_system"
-              />
-              <label class="form-check-label" for="security_system"
-                >보안 시스템</label
-              >
-            </div>
-          </div>
-
-          <div id="price_fields">
-            <!-- 공통 가격 필드 -->
-            <div class="mb-3">
-              <label for="sale_price" class="form-label">매매가</label>
-              <input
-                type="number"
-                class="form-control"
-                id="sale_price"
-                name="sale_price"
-              />
-            </div>
-
-            <!-- 아파트, 오피스텔 등 월세가 있는 매물에만 해당 -->
-            <div class="mb-3" id="monthly_rent_field">
-              <label for="monthly_rent" class="form-label">월세</label>
-              <input
-                type="number"
-                class="form-control"
-                id="monthly_rent"
-                name="monthly_rent"
-              />
-            </div>
-
-            <div class="mb-3" id="deposit_field">
-              <label for="deposit" class="form-label">보증금</label>
-              <input
-                type="number"
-                class="form-control"
-                id="deposit"
-                name="deposit"
-              />
-            </div>
+          <div
+            class="mb-3 <%= (property.property_type === '아파트' || property.property_type === '오피스텔') ? '' : 'hidden' %>"
+            id="deposit_field"
+          >
+            <label for="deposit" class="form-label">보증금</label>
+            <input
+              type="number"
+              class="form-control"
+              id="deposit"
+              name="deposit"
+              value="<%= property.deposit %>"
+            />
           </div>
 
           <div class="mb-3">
@@ -462,6 +383,7 @@
                 class="form-control"
                 id="supply_area"
                 name="supply_area"
+                value="<%= property.supply_area %>"
               />
             </div>
             <div class="mb-3">
@@ -472,6 +394,7 @@
                 class="form-control"
                 id="exclusive_area"
                 name="exclusive_area"
+                value="<%= property.exclusive_area %>"
               />
             </div>
             <div class="mb-2">
@@ -482,17 +405,19 @@
                 class="form-control"
                 id="exclusive_ratio"
                 name="exclusive_ratio"
+                value="<%= ((property.exclusive_area / property.supply_area) * 100).toFixed(2) %>"
                 readonly
               />
             </div>
           </div>
 
-          <button type="submit" class="btn btn-custom">Save Property</button>
+          <button type="submit" class="btn btn-custom">매물 수정</button>
         </form>
       </div>
     </main>
 
     <%- include('partials/footer') %>
+
     <script>
       const districts = {
         서울: ["종로구", "중구", "용산구", "성동구"],
@@ -527,7 +452,7 @@
         const districtSelect = document.getElementById("district");
         districtSelect.innerHTML = '<option value="">지역 선택하기</option>';
         if (city) {
-          districts[city].forEach((district) => {
+          (districts[city] || []).forEach((district) => {
             const option = document.createElement("option");
             option.value = district;
             option.textContent = district;
@@ -543,7 +468,7 @@
           const townSelect = document.getElementById("town");
           townSelect.innerHTML = '<option value="">동/읍/면 선택하기</option>';
           if (district) {
-            towns[district].forEach((town) => {
+            (towns[district] || []).forEach((town) => {
               const option = document.createElement("option");
               option.value = town;
               option.textContent = town;
@@ -561,11 +486,11 @@
           const depositField = document.getElementById("deposit_field");
 
           if (propertyType === "아파트" || propertyType === "오피스텔") {
-            monthlyRentField.style.display = "block";
-            depositField.style.display = "block";
+            monthlyRentField.classList.remove("hidden");
+            depositField.classList.remove("hidden");
           } else {
-            monthlyRentField.style.display = "none";
-            depositField.style.display = "none";
+            monthlyRentField.classList.add("hidden");
+            depositField.classList.add("hidden");
           }
         });
 
